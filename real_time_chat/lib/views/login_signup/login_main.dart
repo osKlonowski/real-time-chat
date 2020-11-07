@@ -17,7 +17,6 @@ class _LoginPageState extends State<LoginPage> {
     if (!_formKey.currentState.validate()) {
       return;
     }
-
     _formKey.currentState.save();
 
     if (_authMode == AuthMode.Login) {
@@ -49,6 +48,8 @@ class _LoginPageState extends State<LoginPage> {
                   _passwordInput(),
                   //Buttons
                   _continue(),
+                  //Toggle
+                  _toggle(),
                 ],
               ),
             ),
@@ -72,36 +73,52 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _emailInput() {
     return TextFormField(
-      decoration: InputDecoration(labelText: "Email"),
-      validator: (String value) {
-        return null;
-      },
+      maxLines: 1,
+      keyboardType: TextInputType.emailAddress,
+      autofocus: false,
+      decoration: InputDecoration(
+          hintText: 'Email',
+          icon: Icon(
+            Icons.mail,
+            color: Colors.white,
+          )),
+      validator: (value) => value.isEmpty ? 'Email can\'t be empty' : null,
+      onSaved: (val) => val.trim(),
     );
   }
 
   Widget _passwordInput() {
     return TextFormField(
-      decoration: InputDecoration(labelText: "Password"),
+      maxLines: 1,
       obscureText: true,
-      validator: (String value) {
-        return null;
-      },
+      autofocus: false,
+      decoration: InputDecoration(
+          hintText: 'Password',
+          icon: Icon(
+            Icons.lock,
+            color: Colors.white,
+          )),
+      validator: (value) => value.isEmpty ? 'Password can\'t be empty' : null,
+      onSaved: (val) => val.trim(),
     );
   }
 
   Widget _toggle() {
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        setState(() {
+          _authMode =
+              _authMode == AuthMode.Login ? AuthMode.Signup : AuthMode.Login;
+        });
+      },
       child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(25.0),
-          color: Colors.white,
-        ),
         child: Center(
           heightFactor: 1.5,
           widthFactor: 2,
           child: Text(
-            'Sign Up',
+            _authMode == AuthMode.Login
+                ? 'Create an Account'
+                : "Already have an account?",
             style: Theme.of(context).textTheme.subtitle1,
           ),
         ),
@@ -111,7 +128,10 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _continue() {
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        //Validate Form
+        _submitForm();
+      },
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(25.0),
@@ -121,7 +141,7 @@ class _LoginPageState extends State<LoginPage> {
           heightFactor: 1.5,
           widthFactor: 2,
           child: Text(
-            'Login',
+            _authMode == AuthMode.Login ? 'Login' : 'Sign Up',
             style: Theme.of(context).textTheme.subtitle1,
           ),
         ),
