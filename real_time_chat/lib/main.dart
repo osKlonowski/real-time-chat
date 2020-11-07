@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:real_time_chat/views/home/home_page.dart';
+import 'package:real_time_chat/views/login_signup/login_main.dart';
 
 void main() {
   runApp(MyApp());
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
         ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: HomePage(),
+      home: LoginPage(),
     );
   }
 }
