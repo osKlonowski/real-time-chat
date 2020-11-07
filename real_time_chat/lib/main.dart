@@ -52,6 +52,7 @@ class _UserEntranceState extends State<UserEntrance> {
   @override
   void initState() {
     if (_auth.currentUser != null) {
+      print(_auth.currentUser.uid);
       setState(() {
         _authStatus = AuthStatus.LOGGED_IN;
       });
@@ -60,8 +61,21 @@ class _UserEntranceState extends State<UserEntrance> {
         _authStatus = AuthStatus.NOT_LOGGED_IN;
       });
     }
-
     super.initState();
+  }
+
+  //Pass this to Login Page to Change Auth State once logged in
+  void loginCallback() {
+    if (_auth.currentUser != null) {
+      print(_auth.currentUser.uid);
+      setState(() {
+        _authStatus = AuthStatus.LOGGED_IN;
+      });
+    } else {
+      setState(() {
+        _authStatus = AuthStatus.NOT_LOGGED_IN;
+      });
+    }
   }
 
   @override

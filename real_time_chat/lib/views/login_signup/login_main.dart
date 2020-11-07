@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:real_time_chat/enums/auth_enum.dart';
+import 'package:real_time_chat/services/authentication.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
@@ -10,10 +11,12 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _passwordController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
   AuthMode _authMode = AuthMode.Login;
+  Auth _authentication = Auth();
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (!_formKey.currentState.validate()) {
       return;
     }
@@ -21,8 +24,24 @@ class _LoginPageState extends State<LoginPage> {
 
     if (_authMode == AuthMode.Login) {
       //Login
+      bool res = await _authentication.signIn(_emailController.text.trim(), _passwordController.text.trim());
+      if(res) {
+        //widget.LoginCallback
+        print('User Successfully Logged In');
+        return;
+      } else {
+        print('Failed To Log In User');
+      }
     } else {
-      //Sign In
+      //Sign Un
+      bool res = await _authentication.signUp(_emailController.text.trim(), _passwordController.text.trim());
+      if(res) {
+        //widget.LoginCallback
+        print('User Successfully Signed Up');
+        return;
+      } else {
+        print('Failed To Sign In User');
+      }
     }
   }
 
@@ -76,6 +95,7 @@ class _LoginPageState extends State<LoginPage> {
       maxLines: 1,
       keyboardType: TextInputType.emailAddress,
       autofocus: false,
+      controller: _emailController,
       decoration: InputDecoration(
           hintText: 'Email',
           icon: Icon(
@@ -92,6 +112,7 @@ class _LoginPageState extends State<LoginPage> {
       maxLines: 1,
       obscureText: true,
       autofocus: false,
+      controller: _passwordController,
       decoration: InputDecoration(
           hintText: 'Password',
           icon: Icon(
