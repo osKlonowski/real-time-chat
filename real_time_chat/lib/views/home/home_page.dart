@@ -1,6 +1,7 @@
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:real_time_chat/global.dart';
+import 'package:real_time_chat/views/home/home_content.dart';
 
 class HomePage extends StatefulWidget {
   final VoidCallback logoutCallback;
@@ -29,8 +30,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       backgroundColor: Colors.white,
       controller: _controller,
       drawerItems: <Widget>[
-        FlatButton(
-          onPressed: widget.logoutCallback,
+        Text(
+          'Profile',
+          style: Theme.of(context).textTheme.headline5,
+        ),
+        Text(
+          'Settings',
+          style: Theme.of(context).textTheme.headline5,
+        ),
+        SizedBox(
+          height: 40,
+        ),
+        GestureDetector(
+          onTap: widget.logoutCallback,
           child: Text(
             'Logout',
             style: Theme.of(context).textTheme.subtitle1,
@@ -52,18 +64,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
           ),
           backgroundColor: primaryBlue,
-        ),
-        body: Container(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Text('Hello World'),
-              ],
+          actions: <Widget>[
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Icon(
+                Icons.person_add,
+                color: Colors.white,
+              ),
             ),
-          ),
+          ],
         ),
+        body: HomeContent(),
       ),
     );
   }
