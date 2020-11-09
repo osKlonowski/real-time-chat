@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:real_time_chat/enums/auth_enum.dart';
 import 'package:real_time_chat/views/home/home_page.dart';
 import 'package:real_time_chat/views/login_signup/login_main.dart';
@@ -18,22 +19,33 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Real Time Chat',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.light,
-        primaryColor: Colors.lightBlue[800],
-        accentColor: Colors.cyan[600],
-        fontFamily: 'Raleway',
-        textTheme: TextTheme(
-          headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
-          headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
-          bodyText2: TextStyle(fontSize: 14.0),
+    return GestureDetector(
+      onTap: () {
+        FocusScopeNode currentFocus = FocusScope.of(context);
+        if (!currentFocus.hasPrimaryFocus) {
+          currentFocus.unfocus();
+        }
+      },
+      child: MaterialApp(
+        title: 'Real Time Chat',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          brightness: Brightness.light,
+          primaryColor: Colors.lightBlue[800],
+          accentColor: Colors.cyan[600],
+          fontFamily: 'Raleway',
+          textTheme: TextTheme(
+            headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
+            headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
+            bodyText2: TextStyle(fontSize: 14.0),
+          ),
+          visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+        home: UserEntrance(),
+        builder: (BuildContext context, Widget child) {
+          return FlutterEasyLoading(child: child);
+        },
       ),
-      home: UserEntrance(),
     );
   }
 }
@@ -78,6 +90,13 @@ class _UserEntranceState extends State<UserEntrance> {
     }
   }
 
+  void logoutCallback() {
+    _auth.signOut();
+    setState(() {
+      _authStatus = AuthStatus.NOT_LOGGED_IN;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     switch (_authStatus) {
@@ -85,10 +104,12 @@ class _UserEntranceState extends State<UserEntrance> {
         return buildWaitingScreen();
         break;
       case AuthStatus.NOT_LOGGED_IN:
-        return LoginPage();
+        return LoginPage(loginCallback);
         break;
       case AuthStatus.LOGGED_IN:
-        return HomePage();
+        return HomePage(
+          logoutCallback: logoutCallback,
+        );
         break;
       default:
         return buildWaitingScreen();
