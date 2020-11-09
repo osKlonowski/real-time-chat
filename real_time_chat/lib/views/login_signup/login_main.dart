@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:real_time_chat/enums/auth_enum.dart';
+import 'package:real_time_chat/global.dart';
 import 'package:real_time_chat/services/authentication.dart';
 
 class LoginPage extends StatefulWidget {
@@ -41,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueAccent,
+      backgroundColor: primaryBlue,
       resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: _showForm(),

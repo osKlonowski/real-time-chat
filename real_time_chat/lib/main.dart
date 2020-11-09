@@ -7,6 +7,8 @@ import 'package:real_time_chat/enums/auth_enum.dart';
 import 'package:real_time_chat/views/home/home_page.dart';
 import 'package:real_time_chat/views/login_signup/login_main.dart';
 
+import 'global.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -118,7 +120,7 @@ class _UserEntranceState extends State<UserEntrance> {
 
   Widget buildWaitingScreen() {
     return Scaffold(
-      backgroundColor: Colors.blueAccent,
+      backgroundColor: primaryBlue,
       body: SafeArea(
         child: Center(
           child: Text(

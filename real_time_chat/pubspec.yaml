@@ -29,6 +29,7 @@ dependencies:
   firebase_auth: ^0.18.3
   provider: ^4.3.2+2
   flutter_easyloading: ^2.0.1
+  fancy_drawer: ^0.0.1
 
 dev_dependencies:
   flutter_test:
