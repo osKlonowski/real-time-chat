@@ -1,8 +1,12 @@
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:real_time_chat/global.dart';
+import 'package:real_time_chat/models/dialogs/add_new_contact_dialog.dart';
 import 'package:real_time_chat/services/database.dart';
 import 'package:real_time_chat/views/home/home_content.dart';
+import 'package:real_time_chat/views/profile/profile_page.dart';
+import 'package:real_time_chat/widgets/welcome/new_user_welcome.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   final VoidCallback logoutCallback;
@@ -17,10 +21,21 @@ class _HomePageState extends State<HomePage>
   FancyDrawerController _controller;
   bool isOpen = false;
 
+  void _showFirstTimeWelcome() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isNewUser = (prefs.getBool('isNewUser') ?? false);
+    if (isNewUser) {
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => NewUserWelcome()));
+      await prefs.setBool('isNewUser', false);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _showFirstTimeWelcome();
     _controller = FancyDrawerController(
         vsync: this, duration: Duration(milliseconds: 250))
       ..addListener(() {
@@ -34,9 +49,15 @@ class _HomePageState extends State<HomePage>
       backgroundColor: Colors.white,
       controller: _controller,
       drawerItems: <Widget>[
-        Text(
-          'Profile',
-          style: Theme.of(context).textTheme.headline5,
+        GestureDetector(
+          onTap: () {
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (context) => ProfilePage()));
+          },
+          child: Text(
+            'Profile',
+            style: Theme.of(context).textTheme.headline5,
+          ),
         ),
         Text(
           'Contacts',
@@ -87,9 +108,9 @@ class _HomePageState extends State<HomePage>
           backgroundColor: primaryBlue,
           actions: <Widget>[
             GestureDetector(
-              onTap: () {
-                //TODO: Allow user to add new contacts
-                print('Add New Contact');
+              onTap: () async {
+                String email = await showAddNewContactDialog(context);
+                print(email);
               },
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),

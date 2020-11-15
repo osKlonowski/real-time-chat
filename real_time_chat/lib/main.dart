@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Real Time Chat',
         debugShowCheckedModeBanner: false,
+        locale: Locale("en"),
         theme: ThemeData(
           brightness: Brightness.light,
           primaryColor: Colors.lightBlue[800],

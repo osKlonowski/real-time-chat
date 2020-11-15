@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Auth {
   FirebaseAuth _auth = FirebaseAuth.instance;
@@ -27,6 +28,7 @@ class Auth {
         email: email,
         password: password,
       );
+      await _setNewUserVal(false);
       return true;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
@@ -48,6 +50,7 @@ class Auth {
       );
       await creds.user.updateProfile(displayName: name);
       await _createUserRef(creds.user.uid, email, name);
+      await _setNewUserVal(true);
       return true;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
@@ -60,5 +63,10 @@ class Auth {
       print(e);
     }
     return false;
+  }
+
+  Future<void> _setNewUserVal(bool status) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isNewUser', status);
   }
 }
