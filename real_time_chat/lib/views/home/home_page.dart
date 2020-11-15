@@ -1,6 +1,7 @@
 import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:real_time_chat/global.dart';
+import 'package:real_time_chat/services/database.dart';
 import 'package:real_time_chat/views/home/home_content.dart';
 
 class HomePage extends StatefulWidget {
@@ -14,6 +15,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with TickerProviderStateMixin, WidgetsBindingObserver {
   FancyDrawerController _controller;
+  bool isOpen = false;
 
   @override
   void initState() {
@@ -37,6 +39,10 @@ class _HomePageState extends State<HomePage>
           style: Theme.of(context).textTheme.headline5,
         ),
         Text(
+          'Contacts',
+          style: Theme.of(context).textTheme.headline5,
+        ),
+        Text(
           'Settings',
           style: Theme.of(context).textTheme.headline5,
         ),
@@ -52,9 +58,22 @@ class _HomePageState extends State<HomePage>
         ),
       ],
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
           leading: GestureDetector(
-            onTap: _controller.open,
+            onTap: () {
+              if (isOpen) {
+                _controller.close();
+                setState(() {
+                  isOpen = false;
+                });
+              } else {
+                _controller.open();
+                setState(() {
+                  isOpen = true;
+                });
+              }
+            },
             child: Icon(Icons.menu, color: Colors.white),
           ),
           title: Text(
@@ -67,11 +86,17 @@ class _HomePageState extends State<HomePage>
           ),
           backgroundColor: primaryBlue,
           actions: <Widget>[
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Icon(
-                Icons.person_add,
-                color: Colors.white,
+            GestureDetector(
+              onTap: () {
+                //TODO: Allow user to add new contacts
+                print('Add New Contact');
+              },
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Icon(
+                  Icons.person_add,
+                  color: Colors.white,
+                ),
               ),
             ),
           ],
@@ -84,10 +109,10 @@ class _HomePageState extends State<HomePage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      DatabaseService().setOnlineStatus(true);
+    } else {
+      DatabaseService().setOnlineStatus(false);
     }
-    //TODO: set status to online here in firestore
-    else {}
-    //TODO: set status to offline here in firestore
   }
 
   @override

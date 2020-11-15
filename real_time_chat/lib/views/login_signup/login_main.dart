@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:real_time_chat/enums/auth_enum.dart';
 import 'package:real_time_chat/global.dart';
 import 'package:real_time_chat/services/authentication.dart';
@@ -15,6 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
+  TextEditingController _nameController = TextEditingController();
   AuthMode _authMode = AuthMode.Login;
   Auth _authentication = Auth();
 
@@ -23,20 +25,28 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
     _formKey.currentState.save();
+    EasyLoading.show(status: 'Loading...');
     switch (_authMode) {
       case AuthMode.Login:
         bool res = await _authentication.signIn(
             _emailController.text.trim(), _passwordController.text.trim());
-        if (res) widget.loginCallback();
+        if (res) {
+          widget.loginCallback();
+          EasyLoading.showToast('Successfully Logged In', toastPosition: EasyLoadingToastPosition.bottom);
+        }
         break;
       case AuthMode.Signup:
-        bool res = await _authentication.signUp(
-            _emailController.text.trim(), _passwordController.text.trim());
-        if (res) widget.loginCallback();
+        bool res = await _authentication.signUp(_emailController.text.trim(),
+            _passwordController.text.trim(), _nameController.text.trim());
+        if (res) {
+          widget.loginCallback();
+          EasyLoading.showToast('Successfully Created New User', toastPosition: EasyLoadingToastPosition.bottom);
+        }
         break;
       default:
         break;
     }
+    EasyLoading.dismiss();
   }
 
   @override
@@ -70,6 +80,10 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
+                  //Name Input
+                  _authMode == AuthMode.Signup
+                      ? _nameInput()
+                      : SizedBox(height: 0),
                   //Email Input
                   _emailInput(),
                   //Password Input
@@ -101,6 +115,42 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  Widget _nameInput() {
+    return Container(
+      margin: const EdgeInsets.only(top: 5, bottom: 5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(18, 4, 14, 4),
+        child: TextFormField(
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            suffixIcon: Icon(
+              Icons.person,
+              color: Colors.grey[700],
+            ),
+            labelText: 'Name',
+            labelStyle: Theme.of(context).textTheme.subtitle1,
+            hintText: 'First and Last Name',
+          ),
+          controller: _nameController,
+          maxLines: 1,
+          onSaved: (val) => val.trim(),
+          keyboardType: TextInputType.text,
+          validator: (val) {
+            if (val.length == 0) {
+              return "name cannot be empty";
+            } else {
+              return null;
+            }
+          },
+        ),
+      ),
+    );
+  }
+
   Widget _emailInput() {
     return Container(
       margin: const EdgeInsets.only(top: 5, bottom: 5),
@@ -119,6 +169,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             labelText: 'Email',
             labelStyle: Theme.of(context).textTheme.subtitle1,
+            hintText: 'john.doe@gmail.com',
           ),
           controller: _emailController,
           maxLines: 1,
@@ -154,6 +205,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             labelText: 'Password',
             labelStyle: Theme.of(context).textTheme.subtitle1,
+            hintText: 'At least 6 characters',
           ),
           obscureText: true,
           controller: _passwordController,
