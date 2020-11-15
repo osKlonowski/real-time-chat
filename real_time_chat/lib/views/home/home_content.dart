@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:real_time_chat/widgets/chat_preview.dart';
-
+import 'package:real_time_chat/widgets/chat_widgets/chat_preview.dart';
 class HomeContent extends StatefulWidget {
   const HomeContent({Key key}) : super(key: key);
 
