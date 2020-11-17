@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:real_time_chat/global.dart';
 import 'package:real_time_chat/models/dialogs/add_new_contact_dialog.dart';
 import 'package:real_time_chat/services/database.dart';
+import 'package:real_time_chat/views/contacts/contacts_page.dart';
 import 'package:real_time_chat/views/home/home_content.dart';
 import 'package:real_time_chat/views/profile/profile_page.dart';
 import 'package:real_time_chat/widgets/welcome/new_user_welcome.dart';
@@ -59,9 +60,15 @@ class _HomePageState extends State<HomePage>
             style: Theme.of(context).textTheme.headline5,
           ),
         ),
-        Text(
-          'Contacts',
-          style: Theme.of(context).textTheme.headline5,
+        GestureDetector(
+          onTap: () {
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (context) => ContactsPage()));
+          },
+          child: Text(
+            'Contacts',
+            style: Theme.of(context).textTheme.headline5,
+          ),
         ),
         Text(
           'Settings',
@@ -109,8 +116,7 @@ class _HomePageState extends State<HomePage>
           actions: <Widget>[
             GestureDetector(
               onTap: () async {
-                String email = await showAddNewContactDialog(context);
-                print(email);
+                await showAddNewContactDialog(context);
               },
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
