@@ -2,8 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:real_time_chat/services/database.dart';
 
-Future<String> showAddNewContactDialog(BuildContext context) async {
+Future<void> showAddNewContactDialog(BuildContext context) async {
   TextEditingController _emailAddress = TextEditingController();
   if (Platform.isIOS) {
     await showDialog(
@@ -25,14 +26,19 @@ Future<String> showAddNewContactDialog(BuildContext context) async {
             child: Text('Cancel'),
             onPressed: () {
               Navigator.of(context).pop();
-              return '';
             },
           ),
           FlatButton(
             child: Text('Add'),
             onPressed: () {
+              if(_emailAddress.text.trim() != null) {
+                try {
+                  DatabaseService().addNewContact(_emailAddress.text.trim());
+                } catch (e) {
+                  print(e);
+                }
+              }
               Navigator.of(context).pop();
-              return _emailAddress.text.trim();
             },
           )
         ],
@@ -64,8 +70,14 @@ Future<String> showAddNewContactDialog(BuildContext context) async {
           FlatButton(
             child: Text('Add'),
             onPressed: () {
+              if(_emailAddress.text.trim() != null) {
+                try {
+                  DatabaseService().addNewContact(_emailAddress.text.trim());
+                } catch (e) {
+                  print(e);
+                }
+              }
               Navigator.of(context).pop();
-              return _emailAddress.text.trim();
             },
           )
         ],
