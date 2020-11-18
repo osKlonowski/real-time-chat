@@ -21,34 +21,26 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        FocusScopeNode currentFocus = FocusScope.of(context);
-        if (!currentFocus.hasPrimaryFocus) {
-          currentFocus.unfocus();
-        }
-      },
-      child: MaterialApp(
-        title: 'Real Time Chat',
-        debugShowCheckedModeBanner: false,
-        locale: Locale("en"),
-        theme: ThemeData(
-          brightness: Brightness.light,
-          primaryColor: Colors.lightBlue[800],
-          accentColor: Colors.cyan[600],
-          fontFamily: 'Raleway',
-          textTheme: TextTheme(
-            headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
-            headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
-            bodyText2: TextStyle(fontSize: 14.0),
-          ),
-          visualDensity: VisualDensity.adaptivePlatformDensity,
+    return MaterialApp(
+      title: 'Real Time Chat',
+      debugShowCheckedModeBanner: false,
+      locale: Locale("en"),
+      theme: ThemeData(
+        brightness: Brightness.light,
+        primaryColor: Colors.lightBlue[800],
+        accentColor: Colors.cyan[600],
+        fontFamily: 'Raleway',
+        textTheme: TextTheme(
+          headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
+          headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
+          bodyText2: TextStyle(fontSize: 14.0),
         ),
-        home: UserEntrance(),
-        builder: (BuildContext context, Widget child) {
-          return FlutterEasyLoading(child: child);
-        },
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
+      home: UserEntrance(),
+      builder: (BuildContext context, Widget child) {
+        return FlutterEasyLoading(child: child);
+      },
     );
   }
 }

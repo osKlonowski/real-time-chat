@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:real_time_chat/services/database.dart';
 import 'package:real_time_chat/views/chat/chat_page.dart';
 
 class ChatPreview extends StatelessWidget {
-  const ChatPreview({Key key}) : super(key: key);
+  final dynamic contactInfo;
+  const ChatPreview({Key key, this.contactInfo}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -10,8 +13,14 @@ class ChatPreview extends StatelessWidget {
       constraints: BoxConstraints(minHeight: 90),
       child: GestureDetector(
         onTap: () {
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => ChatPage()));
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ChatPage(
+                chatId: contactInfo['chatId'],
+                nameOfUser: contactInfo['name'],
+              ),
+            ),
+          );
         },
         child: Container(
           padding: const EdgeInsets.only(
@@ -27,17 +36,80 @@ class ChatPreview extends StatelessWidget {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  width: 75,
-                  height: 75,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: NetworkImage(
-                          'https://mindbodygreen-res.cloudinary.com/images/w_767,q_auto:eco,f_auto,fl_lossy/usr/RetocQT/sarah-fielding.jpg'),
-                    ),
-                  ),
+                child: FutureBuilder(
+                  future: DatabaseService()
+                      .getUserProfilePicture(contactInfo['uid']),
+                  builder: (context, snapshot) {
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.done:
+                        if (snapshot.hasData && snapshot.data != null) {
+                          return Container(
+                            width: 75,
+                            height: 75,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                fit: BoxFit.cover,
+                                image: NetworkImage(snapshot.data),
+                              ),
+                            ),
+                          );
+                        } else {
+                          return Container(
+                            width: 75,
+                            height: 75,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.grey[400],
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Unavailable',
+                                softWrap: true,
+                                style: TextStyle(
+                                  fontSize: 12.0,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                        break;
+                      case ConnectionState.active:
+                      case ConnectionState.waiting:
+                        return Container(
+                          width: 75,
+                          height: 75,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.blueGrey,
+                          ),
+                          child: Center(
+                              child: Text(
+                                'Loading..',
+                                softWrap: true,
+                                style: TextStyle(
+                                  fontSize: 12.0,
+                                ),
+                              ),
+                            ),
+                        );
+                        break;
+                      case ConnectionState.none:
+                      default:
+                        return Container(
+                          width: 75,
+                          height: 75,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey[200],
+                          ),
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                        break;
+                    }
+                  },
                 ),
               ),
               Expanded(
@@ -50,9 +122,8 @@ class ChatPreview extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
                           Expanded(
-                            flex: 6,
                             child: Text(
-                              'Angelica Rose',
+                              contactInfo['name'],
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               textAlign: TextAlign.left,
@@ -65,15 +136,63 @@ class ChatPreview extends StatelessWidget {
                           ),
                           Flexible(
                             fit: FlexFit.loose,
-                            flex: 4,
-                            child: Text('10:45 PM'),
+                            child: FutureBuilder(
+                              future: DatabaseService()
+                                  .getMostRecentMessage(contactInfo['chatId']),
+                              builder: (context, snapshot) {
+                                switch (snapshot.connectionState) {
+                                  case ConnectionState.done:
+                                    if (snapshot.hasData &&
+                                        snapshot.data != null) {
+                                      Timestamp time = snapshot.data['time'];
+
+                                      return Text(
+                                          '${time.toDate().hour}:${time.toDate().minute}');
+                                    } else {
+                                      return Text(
+                                          'Unable to retrieve last message');
+                                    }
+                                    break;
+                                  case ConnectionState.active:
+                                  case ConnectionState.waiting:
+                                    return LinearProgressIndicator();
+                                    break;
+                                  case ConnectionState.none:
+                                  default:
+                                    return Text('Error Occured');
+                                    break;
+                                }
+                              },
+                            ),
                           ),
                         ],
                       ),
                       SizedBox(
                         height: 8,
                       ),
-                      Text('This was the last message')
+                      FutureBuilder(
+                        future: DatabaseService()
+                            .getMostRecentMessage(contactInfo['chatId']),
+                        builder: (context, snapshot) {
+                          switch (snapshot.connectionState) {
+                            case ConnectionState.done:
+                              if (snapshot.hasData && snapshot.data != null) {
+                                return Text(snapshot.data['text']);
+                              } else {
+                                return Text('Unable to retrieve last message');
+                              }
+                              break;
+                            case ConnectionState.active:
+                            case ConnectionState.waiting:
+                              return LinearProgressIndicator();
+                              break;
+                            case ConnectionState.none:
+                            default:
+                              return Text('Error Occured');
+                              break;
+                          }
+                        },
+                      ),
                     ],
                   ),
                 ),

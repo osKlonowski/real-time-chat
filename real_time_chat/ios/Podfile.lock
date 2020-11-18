@@ -230,6 +230,9 @@ PODS:
     - FirebaseAuth (~> 6.9.2)
   - Firebase/CoreOnly (6.33.0):
     - FirebaseCore (= 6.10.3)
+  - Firebase/Database (6.33.0):
+    - Firebase/CoreOnly
+    - FirebaseDatabase (~> 6.6.0)
   - Firebase/Firestore (6.33.0):
     - Firebase/CoreOnly
     - FirebaseFirestore (~> 1.18.0)
@@ -247,6 +250,11 @@ PODS:
     - Firebase/CoreOnly (~> 6.33.0)
     - Flutter
   - firebase_core_web (0.1.0):
+    - Flutter
+  - firebase_database (4.3.0):
+    - Firebase/CoreOnly (~> 6.33.0)
+    - Firebase/Database (~> 6.33.0)
+    - firebase_core
     - Flutter
   - firebase_storage (5.0.1):
     - Firebase/CoreOnly (~> 6.33.0)
@@ -267,6 +275,9 @@ PODS:
     - GoogleUtilities/Environment (~> 6.7)
     - GoogleUtilities/Logger (~> 6.7)
     - nanopb (~> 1.30906.0)
+  - FirebaseDatabase (6.6.0):
+    - FirebaseCore (~> 6.10)
+    - leveldb-library (~> 1.22)
   - FirebaseFirestore (1.18.0):
     - abseil/algorithm (= 0.20200225.0)
     - abseil/base (= 0.20200225.0)
@@ -358,6 +369,7 @@ DEPENDENCIES:
   - firebase_auth_web (from `.symlinks/plugins/firebase_auth_web/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_core_web (from `.symlinks/plugins/firebase_core_web/ios`)
+  - firebase_database (from `.symlinks/plugins/firebase_database/ios`)
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - Flutter (from `Flutter`)
   - flutter_plugin_android_lifecycle (from `.symlinks/plugins/flutter_plugin_android_lifecycle/ios`)
@@ -378,6 +390,7 @@ SPEC REPOS:
     - FirebaseAuth
     - FirebaseCore
     - FirebaseCoreDiagnostics
+    - FirebaseDatabase
     - FirebaseFirestore
     - FirebaseStorage
     - GoogleDataTransport
@@ -402,6 +415,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_core/ios"
   firebase_core_web:
     :path: ".symlinks/plugins/firebase_core_web/ios"
+  firebase_database:
+    :path: ".symlinks/plugins/firebase_database/ios"
   firebase_storage:
     :path: ".symlinks/plugins/firebase_storage/ios"
   Flutter:
@@ -435,10 +450,12 @@ SPEC CHECKSUMS:
   firebase_auth_web: 0955c07bcc06e84af76b9d4e32e6f31518f2d7de
   firebase_core: 350ba329d1641211bc6183a3236893cafdacfea7
   firebase_core_web: d501d8b946b60c8af265428ce483b0fff5ad52d1
+  firebase_database: bd51dc26c060f6e27a1326bc8c1ba283cd63c987
   firebase_storage: d5cf595245e1770ef7081b026f603771bf5dd547
   FirebaseAuth: c92d49ada7948d1a23466e3db17bc4c2039dddc3
   FirebaseCore: d889d9e12535b7f36ac8bfbf1713a0836a3012cd
   FirebaseCoreDiagnostics: 770ac5958e1372ce67959ae4b4f31d8e127c3ac1
+  FirebaseDatabase: 13a865a4b85897462b930eb683bda8f52583713f
   FirebaseFirestore: adff4877869ca91a11250cc0989a6cd56bad163f
   FirebaseStorage: 15e0f15ef3c7fec3d1899d68623e47d4447066b4
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec

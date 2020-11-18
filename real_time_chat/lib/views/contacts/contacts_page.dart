@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:real_time_chat/global.dart';
 import 'package:real_time_chat/models/dialogs/add_new_contact_dialog.dart';
+import 'package:real_time_chat/models/dialogs/remove_contact_dialog.dart';
 import 'package:real_time_chat/services/database.dart';
 import 'package:real_time_chat/views/chat/chat_page.dart';
 
@@ -14,6 +15,7 @@ class ContactsPage extends StatefulWidget {
 }
 
 class _ContactsPageState extends State<ContactsPage> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,18 +46,18 @@ class _ContactsPageState extends State<ContactsPage> {
         ],
       ),
       body: SafeArea(
-        child: FutureBuilder(
-          future: DatabaseService().getListOfContacts(),
+        child: StreamBuilder(
+          stream: DatabaseService().getListOfContacts(),
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
-              case ConnectionState.active:
+              case ConnectionState.done:
               case ConnectionState.waiting:
               case ConnectionState.none:
                 return Center(
                   child: CircularProgressIndicator(),
                 );
                 break;
-              case ConnectionState.done:
+              case ConnectionState.active:
                 return ListView.builder(
                   itemCount: snapshot.data.docs.length,
                   itemBuilder: (context, index) {
@@ -113,24 +115,35 @@ class _ContactsPageState extends State<ContactsPage> {
       ),
       onTap: () async {
         EasyLoading.show(status: 'Loading...');
-        if(data['activeChat']) {
-          //TODO: Open Chat -> Pass Chat Id
-          // print(data['chatId']);
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => ChatPage()));
+        if (data['activeChat']) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ChatPage(
+                chatId: data['chatId'],
+                nameOfUser: data['name'],
+              ),
+            ),
+          );
         } else {
-          bool createdChat = await DatabaseService().createNewChat(data['uid']);
-          if(createdChat) {
-            Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => ChatPage()));
-          } else {
-            EasyLoading.showError('Unable To Create Chat');
-          }
+          await DatabaseService().createNewChat(data['uid']).then((value) {
+            if (value != null) {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => ChatPage(
+                    chatId: value,
+                    nameOfUser: data['name'],
+                  ),
+                ),
+              );
+            } else {
+              EasyLoading.showError('Unable To Create Chat');
+            }
+          });
         }
         EasyLoading.dismiss();
       },
-      onLongPress: () {
-        //TODO: Delete Contact Modal Dialog
+      onLongPress: () async {
+        await removeContactDialog(context, data['uid']);
       },
     );
   }

@@ -10,6 +10,95 @@ class DatabaseService {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   FirebaseStorage _storage = FirebaseStorage.instance;
 
+  Future<String> getUserProfilePicture(String uid) async {
+    try {
+      DocumentSnapshot ref = await _firestore.collection('users').doc(uid).get();
+      return ref.data()['profilePictureUrl'];
+    } on FirebaseException catch (e) {
+      print(e);
+      return null;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>> getMostRecentMessage(String chatId) async {
+    try {
+      QuerySnapshot ref = await _firestore.collection('chats').doc(chatId).collection('messages').orderBy('time', descending: true).limit(1).get();
+      return ref.docs[0].data();
+    } on FirebaseException catch (e) {
+      print(e);
+      return null;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<bool> sendText(String chatId, String text) async {
+    try {
+      _firestore.collection('chats').doc(chatId).collection('messages').add({
+        'text': text,
+        'sender_uid': _auth.currentUser.uid,
+        'sender_name': _auth.currentUser.displayName,
+        'time': FieldValue.serverTimestamp()
+      });
+      return true;
+    } on FirebaseException catch (e) {
+      print(e);
+      return false;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
+  String getUid() {
+    return _auth.currentUser.uid;
+  }
+
+  Stream<QuerySnapshot> chatMessages(String chatId) {
+    return _firestore
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .snapshots();
+  }
+
+  Future<bool> removeContact(String uid) async {
+    try {
+      DocumentSnapshot doc = await _firestore
+          .collection('users')
+          .doc(_auth.currentUser.uid)
+          .collection('contacts')
+          .doc(uid)
+          .get();
+      if (doc.data()['activeChat']) {
+        await _firestore.collection('chats').doc(doc.data()['chatId']).delete();
+      }
+      await _firestore
+          .collection('users')
+          .doc(_auth.currentUser.uid)
+          .collection('contacts')
+          .doc(uid)
+          .delete();
+      await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('contacts')
+          .doc(_auth.currentUser.uid)
+          .delete();
+      return true;
+    } on FirebaseException catch (e) {
+      print(e);
+      return false;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
   Future<QuerySnapshot> getListOfChats() {
     return _firestore
         .collection('users')
@@ -19,7 +108,7 @@ class DatabaseService {
         .get();
   }
 
-  Future<bool> createNewChat(String uid) async {
+  Future<String> createNewChat(String uid) async {
     try {
       DocumentReference chatRef = await _firestore.collection('chats').add({
         'member1': _auth.currentUser.uid,
@@ -43,22 +132,21 @@ class DatabaseService {
         'activeChat': true,
         'chatId': chatRef.id,
       });
-      return true;
+      return chatRef.id;
     } on FirebaseException catch (e) {
       print(e);
-      return false;
+      return null;
     } catch (e) {
       print(e);
-      return false;
+      return null;
     }
   }
 
-  Future<QuerySnapshot> getListOfContacts() {
+  Stream<QuerySnapshot> getListOfContacts() {
     return _firestore
         .collection('users')
         .doc(_auth.currentUser.uid)
-        .collection('contacts')
-        .get();
+        .collection('contacts').snapshots();
   }
 
   Future<bool> addNewContact(String email) async {

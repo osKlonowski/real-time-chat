@@ -23,7 +23,7 @@ class _HomeContentState extends State<HomeContent> {
                   itemCount: snapshot.data.docs.length,
                   itemBuilder: (context, index) {
                     dynamic data = snapshot.data.docs[index].data();
-                    return ChatPreview();
+                    return ChatPreview(contactInfo: data);
                   },
                 );
               } else {
@@ -35,12 +35,12 @@ class _HomeContentState extends State<HomeContent> {
               }
               break;
             case ConnectionState.active:
+            case ConnectionState.waiting:
               return Center(
                 child: CircularProgressIndicator(),
               );
               break;
             case ConnectionState.none:
-            case ConnectionState.waiting:
             default:
               return Center(
                 child: CircularProgressIndicator(),
