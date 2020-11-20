@@ -115,6 +115,15 @@ class _NewUserWelcomeState extends State<NewUserWelcome> {
     );
   }
 
+  Widget _skipBtn() {
+    return GestureDetector(
+      onTap: () {
+        //TODO: Skip
+      },
+      child: Container(), //TODO: Implement skip
+    );
+  }
+
   Widget _addBtn(BuildContext context) {
     return GestureDetector(
       onTap: _getProfilePicture,

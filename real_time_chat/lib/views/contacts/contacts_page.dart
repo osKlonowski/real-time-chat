@@ -116,7 +116,7 @@ class _ContactsPageState extends State<ContactsPage> {
       onTap: () async {
         EasyLoading.show(status: 'Loading...');
         if (data['activeChat']) {
-          Navigator.of(context).push(
+          Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (context) => ChatPage(
                 chatId: data['chatId'],
@@ -127,7 +127,7 @@ class _ContactsPageState extends State<ContactsPage> {
         } else {
           await DatabaseService().createNewChat(data['uid']).then((value) {
             if (value != null) {
-              Navigator.of(context).push(
+              Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                   builder: (context) => ChatPage(
                     chatId: value,
