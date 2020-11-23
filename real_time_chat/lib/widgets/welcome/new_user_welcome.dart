@@ -108,6 +108,8 @@ class _NewUserWelcomeState extends State<NewUserWelcome> {
               //RULES
               //Continue Button
               _addBtn(context),
+              SizedBox(height: 15.0,),
+              _skipBtn(),
             ],
           ),
         ),
@@ -120,7 +122,16 @@ class _NewUserWelcomeState extends State<NewUserWelcome> {
       onTap: () {
         //TODO: Skip
       },
-      child: Container(), //TODO: Implement skip
+      child: Container(
+        padding: const EdgeInsets.all(4.0),
+        child: Text(
+          'skip',
+          style: TextStyle(
+            fontSize: 11.0,
+            color: Colors.blueAccent,
+          ),
+        ),
+      ),
     );
   }
 
