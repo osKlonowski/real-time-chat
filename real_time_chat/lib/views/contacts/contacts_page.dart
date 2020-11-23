@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:provider/provider.dart';
 import 'package:real_time_chat/global.dart';
+import 'package:real_time_chat/models/classes/contact_class.dart';
 import 'package:real_time_chat/models/dialogs/add_new_contact_dialog.dart';
 import 'package:real_time_chat/models/dialogs/remove_contact_dialog.dart';
 import 'package:real_time_chat/services/database.dart';
+import 'package:real_time_chat/services/providers/chat_provider.dart';
 import 'package:real_time_chat/views/chat/chat_page.dart';
 
 class ContactsPage extends StatefulWidget {
@@ -15,7 +18,6 @@ class ContactsPage extends StatefulWidget {
 }
 
 class _ContactsPageState extends State<ContactsPage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,8 +63,9 @@ class _ContactsPageState extends State<ContactsPage> {
                 return ListView.builder(
                   itemCount: snapshot.data.docs.length,
                   itemBuilder: (context, index) {
-                    dynamic data = snapshot.data.docs[index].data();
-                    return _contactTile(data);
+                    Contact contact =
+                        Contact.fromFirestore(snapshot.data.docs[index]);
+                    return _contactTile(contact);
                   },
                 );
                 break;
@@ -78,8 +81,7 @@ class _ContactsPageState extends State<ContactsPage> {
     );
   }
 
-  Widget _contactTile(dynamic data) {
-    Timestamp time = data['createdAt'];
+  Widget _contactTile(Contact contact) {
     return ListTile(
       leading: Icon(
         Icons.person,
@@ -91,7 +93,7 @@ class _ContactsPageState extends State<ContactsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            data['name'],
+            contact.name,
             style: TextStyle(
               color: Colors.black,
               fontSize: 20.0,
@@ -99,7 +101,7 @@ class _ContactsPageState extends State<ContactsPage> {
             ),
           ),
           Text(
-            "created: ${time.toDate().day}-${time.toDate().month}-${time.toDate().year}",
+            "created: ${contact.createdAt.toDate().day}-${contact.createdAt.toDate().month}-${contact.createdAt.toDate().year}",
             style: TextStyle(
               color: Colors.grey[800],
               fontSize: 14.0,
@@ -115,23 +117,25 @@ class _ContactsPageState extends State<ContactsPage> {
       ),
       onTap: () async {
         EasyLoading.show(status: 'Loading...');
-        if (data['activeChat']) {
+        if (contact.activeChat && contact.chatId != '') {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-              builder: (context) => ChatPage(
-                chatId: data['chatId'],
-                nameOfUser: data['name'],
+              builder: (context) => ChangeNotifierProvider(
+                create: (_) => ChatProvider(contact),
+                child: ChatPage(),
               ),
             ),
           );
         } else {
-          await DatabaseService().createNewChat(data['uid']).then((value) {
+          await DatabaseService()
+              .createNewChat(contact.contactUid)
+              .then((value) {
             if (value != null) {
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
-                  builder: (context) => ChatPage(
-                    chatId: value,
-                    nameOfUser: data['name'],
+                  builder: (context) => ChangeNotifierProvider(
+                    create: (_) => ChatProvider(contact),
+                    child: ChatPage(),
                   ),
                 ),
               );
@@ -143,7 +147,7 @@ class _ContactsPageState extends State<ContactsPage> {
         EasyLoading.dismiss();
       },
       onLongPress: () async {
-        await removeContactDialog(context, data['uid']);
+        await removeContactDialog(context, contact.contactUid);
       },
     );
   }

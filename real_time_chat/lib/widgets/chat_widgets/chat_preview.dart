@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:real_time_chat/models/classes/contact_class.dart';
 import 'package:real_time_chat/services/database.dart';
+import 'package:real_time_chat/services/providers/chat_provider.dart';
 import 'package:real_time_chat/views/chat/chat_page.dart';
 
 class ChatPreview extends StatelessWidget {
-  final dynamic contactInfo;
-  const ChatPreview({Key key, this.contactInfo}) : super(key: key);
+  final Contact contact;
+  const ChatPreview({Key key, this.contact}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,9 +18,9 @@ class ChatPreview extends StatelessWidget {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => ChatPage(
-                chatId: contactInfo['chatId'],
-                nameOfUser: contactInfo['name'],
+              builder: (context) => ChangeNotifierProvider(
+                create: (_) => ChatProvider(contact),
+                child: ChatPage(),
               ),
             ),
           );
@@ -38,7 +41,7 @@ class ChatPreview extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: FutureBuilder(
                   future: DatabaseService()
-                      .getUserProfilePicture(contactInfo['uid']),
+                      .getUserProfilePicture(contact.contactUid),
                   builder: (context, snapshot) {
                     switch (snapshot.connectionState) {
                       case ConnectionState.done:
@@ -84,14 +87,14 @@ class ChatPreview extends StatelessWidget {
                             color: Colors.blueGrey,
                           ),
                           child: Center(
-                              child: Text(
-                                'Loading..',
-                                softWrap: true,
-                                style: TextStyle(
-                                  fontSize: 12.0,
-                                ),
+                            child: Text(
+                              'Loading..',
+                              softWrap: true,
+                              style: TextStyle(
+                                fontSize: 12.0,
                               ),
                             ),
+                          ),
                         );
                         break;
                       case ConnectionState.none:
@@ -123,7 +126,7 @@ class ChatPreview extends StatelessWidget {
                         children: <Widget>[
                           Expanded(
                             child: Text(
-                              contactInfo['name'],
+                              contact.name,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               textAlign: TextAlign.left,
@@ -138,14 +141,13 @@ class ChatPreview extends StatelessWidget {
                             fit: FlexFit.loose,
                             child: FutureBuilder(
                               future: DatabaseService()
-                                  .getMostRecentMessage(contactInfo['chatId']),
+                                  .getMostRecentMessage(contact.chatId),
                               builder: (context, snapshot) {
                                 switch (snapshot.connectionState) {
                                   case ConnectionState.done:
                                     if (snapshot.hasData &&
                                         snapshot.data != null) {
                                       Timestamp time = snapshot.data['time'];
-
                                       return Text(
                                           '${time.toDate().hour}:${time.toDate().minute}');
                                     } else {
@@ -172,7 +174,7 @@ class ChatPreview extends StatelessWidget {
                       ),
                       FutureBuilder(
                         future: DatabaseService()
-                            .getMostRecentMessage(contactInfo['chatId']),
+                            .getMostRecentMessage(contact.chatId),
                         builder: (context, snapshot) {
                           switch (snapshot.connectionState) {
                             case ConnectionState.done:

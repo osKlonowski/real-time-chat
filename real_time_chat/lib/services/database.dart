@@ -4,11 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:real_time_chat/models/classes/contact_class.dart';
 
 class DatabaseService {
   FirebaseAuth _auth = FirebaseAuth.instance;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  FirebaseStorage _storage = FirebaseStorage.instance;
+  FirebaseStorage _storage = FirebaseStorage.instance;  
 
   Future<String> getUserProfilePicture(String uid) async {
     try {
@@ -36,34 +37,8 @@ class DatabaseService {
     }
   }
 
-  Future<bool> sendText(String chatId, String text) async {
-    try {
-      _firestore.collection('chats').doc(chatId).collection('messages').add({
-        'text': text,
-        'sender_uid': _auth.currentUser.uid,
-        'sender_name': _auth.currentUser.displayName,
-        'time': FieldValue.serverTimestamp()
-      });
-      return true;
-    } on FirebaseException catch (e) {
-      print(e);
-      return false;
-    } catch (e) {
-      print(e);
-      return false;
-    }
-  }
-
   String getUid() {
     return _auth.currentUser.uid;
-  }
-
-  Stream<QuerySnapshot> chatMessages(String chatId) {
-    return _firestore
-        .collection('chats')
-        .doc(chatId)
-        .collection('messages')
-        .snapshots();
   }
 
   Future<bool> removeContact(String uid) async {
@@ -99,13 +74,14 @@ class DatabaseService {
     }
   }
 
-  Future<QuerySnapshot> getListOfChats() {
-    return _firestore
+  Future<List<Contact>> getListOfChats() async {
+    QuerySnapshot snapshot = await _firestore
         .collection('users')
         .doc(_auth.currentUser.uid)
         .collection('contacts')
         .where('activeChat', isEqualTo: true)
         .get();
+    return snapshot.docs.map((doc) => Contact.fromFirestore(doc)).toList();
   }
 
   Future<String> createNewChat(String uid) async {

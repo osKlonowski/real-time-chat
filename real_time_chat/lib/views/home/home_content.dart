@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:real_time_chat/models/classes/contact_class.dart';
 import 'package:real_time_chat/services/database.dart';
 import 'package:real_time_chat/widgets/chat_widgets/chat_preview.dart';
 
@@ -18,12 +19,12 @@ class _HomeContentState extends State<HomeContent> {
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
-              if (snapshot.hasData && snapshot.data.docs.length > 0) {
+              if (snapshot.hasData && snapshot.data.length > 0) {
+                List<Contact> chats = snapshot.data;
                 return ListView.builder(
-                  itemCount: snapshot.data.docs.length,
+                  itemCount: chats.length,
                   itemBuilder: (context, index) {
-                    dynamic data = snapshot.data.docs[index].data();
-                    return ChatPreview(contactInfo: data);
+                    return ChatPreview(contact: chats[index]);
                   },
                 );
               } else {

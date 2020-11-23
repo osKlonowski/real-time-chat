@@ -2,40 +2,28 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:provider/provider.dart';
 import 'package:real_time_chat/global.dart';
 import 'package:real_time_chat/services/database.dart';
+import 'package:real_time_chat/services/providers/chat_provider.dart';
 
 class ChatPage extends StatefulWidget {
-  final String chatId;
-  final String nameOfUser;
-  ChatPage({Key key, this.chatId, this.nameOfUser}) : super(key: key);
+  ChatPage({Key key}) : super(key: key);
 
   @override
   _ChatPageState createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
-  CollectionReference chatReference;
+  ChatProvider chatProvider;
   final TextEditingController _textController = TextEditingController();
-  bool _isWriting = false;
-
-  @override
-  void initState() {
-    chatReference = FirebaseFirestore.instance
-        .collection('chats')
-        .doc(widget.chatId)
-        .collection('messages');
-    super.initState();
-    _textController.addListener(() {
-      print('Text Controller Listener Triggered');
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
+    chatProvider = Provider.of<ChatProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.nameOfUser),
+        title: Text(chatProvider.name),
         centerTitle: true,
         backgroundColor: primaryBlue,
       ),
@@ -43,6 +31,7 @@ class _ChatPageState extends State<ChatPage> {
         onTap: () {
           FocusScopeNode currentFocus = FocusScope.of(context);
           if (!currentFocus.hasPrimaryFocus) {
+            chatProvider.clearMessage();
             currentFocus.unfocus();
           }
         },
@@ -50,8 +39,9 @@ class _ChatPageState extends State<ChatPage> {
           child: Column(
             children: <Widget>[
               StreamBuilder<QuerySnapshot>(
-                stream:
-                    chatReference.orderBy('time', descending: true).snapshots(),
+                stream: chatProvider.chatReference
+                    .orderBy('time', descending: true)
+                    .snapshots(),
                 builder: (context, snapshot) {
                   switch (snapshot.connectionState) {
                     case ConnectionState.active:
@@ -102,21 +92,21 @@ class _ChatPageState extends State<ChatPage> {
         color: primaryBlue,
       ),
       onPressed: () async {
-        //TODO: Implement _isWriting
-        //Send Message
-        await DatabaseService()
-            .sendText(widget.chatId, _textController.text.trim())
+        await chatProvider
+            .sendText(_textController.text.trim())
             .timeout(Duration(seconds: 3), onTimeout: () {
           EasyLoading.showToast('Message Timeout - Please Try Again',
               toastPosition: EasyLoadingToastPosition.bottom);
           return false;
         });
+        FocusScope.of(context).unfocus();
         _textController.clear();
       },
     );
   }
 
   Widget _buildTextComposer() {
+    chatProvider.createMessageRef();
     return SafeArea(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -128,15 +118,11 @@ class _ChatPageState extends State<ChatPage> {
                 keyboardType: TextInputType.multiline,
                 onChanged: (value) {
                   print('On changed');
-                },
-                onEditingComplete: () {
-                  print('Edit Complete');
+                  //TODO: Update message with text
+                  chatProvider.updateMessage(value.trim());
                 },
                 onTap: () {
-                  print('Tap');
-                },
-                onSubmitted: (value) async {
-                  print('Submitted');
+                  chatProvider.setSentStatus = false;
                 },
                 decoration:
                     InputDecoration.collapsed(hintText: 'Type a message...'),
@@ -217,16 +203,20 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   _generateMessages(AsyncSnapshot<QuerySnapshot> snapshot) {
-    return snapshot.data.docs
-        .map<Widget>((doc) => Container(
-              margin: const EdgeInsets.symmetric(vertical: 4.0),
-              child: Row(
-                children: doc.data()['sender_uid'] != DatabaseService().getUid()
-                    ? _generateReceiverLayout(doc)
-                    : _generateSenderLayout(doc),
-              ),
-            ))
-        .toList();
+    return snapshot.data.docs.map<Widget>((doc) {
+      if (doc['text'] != '.&.&.') {
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 4.0),
+          child: Row(
+            children: doc.data()['sender_uid'] != DatabaseService().getUid()
+                ? _generateReceiverLayout(doc)
+                : _generateSenderLayout(doc),
+          ),
+        );
+      } else {
+        return SizedBox(height: 0, width: 0,);
+      }
+    }).toList();
   }
 
   Widget _buildWaitingWidget({String errorMessage}) {
