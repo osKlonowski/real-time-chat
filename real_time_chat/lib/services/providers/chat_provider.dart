@@ -9,11 +9,11 @@ class ChatProvider extends ChangeNotifier {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   //Constructor
-  ChatProvider(Contact contact) {
+  ChatProvider(Contact contact, String chatId) {
     _contact = contact;
-    _chatId = contact.chatId;
+    _chatId = chatId;
     chatReference =
-        _firestore.collection('chats').doc(contact.chatId).collection('messages').where('text', isNotEqualTo: '.&.&.');
+        _firestore.collection('chats').doc(chatId).collection('messages');
   }
 
   //Variables

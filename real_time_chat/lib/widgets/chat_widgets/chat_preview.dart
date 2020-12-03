@@ -19,7 +19,7 @@ class ChatPreview extends StatelessWidget {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => ChangeNotifierProvider(
-                create: (_) => ChatProvider(contact),
+                create: (_) => ChatProvider(contact, contact.chatId),
                 child: ChatPage(),
               ),
             ),

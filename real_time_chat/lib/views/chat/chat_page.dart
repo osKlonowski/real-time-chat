@@ -73,11 +73,6 @@ class _ChatPageState extends State<ChatPage> {
                 decoration: BoxDecoration(color: Colors.grey[100]),
                 child: _buildTextComposer(),
               ),
-              // Builder(
-              //   builder: (context) {
-              //     return Container(height: 0, width: 0);
-              //   },
-              // ),
             ],
           ),
         ),
@@ -95,8 +90,10 @@ class _ChatPageState extends State<ChatPage> {
         await chatProvider
             .sendText(_textController.text.trim())
             .timeout(Duration(seconds: 3), onTimeout: () {
-          EasyLoading.showToast('Message Timeout - Please Try Again',
-              toastPosition: EasyLoadingToastPosition.bottom);
+          EasyLoading.showToast(
+            'Message Timeout - Please Try Again',
+            toastPosition: EasyLoadingToastPosition.bottom,
+          );
           return false;
         });
         FocusScope.of(context).unfocus();
@@ -106,7 +103,6 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget _buildTextComposer() {
-    chatProvider.createMessageRef();
     return SafeArea(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -117,11 +113,14 @@ class _ChatPageState extends State<ChatPage> {
                 controller: _textController,
                 keyboardType: TextInputType.multiline,
                 onChanged: (value) {
-                  if(value.isNotEmpty) {
+                  if (value.isNotEmpty) {
                     chatProvider.updateMessage(value.trim());
                   }
                 },
                 onTap: () {
+                  if(_textController.text.isEmpty) {
+                    chatProvider.createMessageRef();
+                  }
                   chatProvider.setSentStatus = false;
                 },
                 decoration:
@@ -214,7 +213,10 @@ class _ChatPageState extends State<ChatPage> {
           ),
         );
       } else {
-        return SizedBox(height: 0, width: 0,);
+        return SizedBox(
+          height: 0,
+          width: 0,
+        );
       }
     }).toList();
   }

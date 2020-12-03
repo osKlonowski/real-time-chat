@@ -121,7 +121,7 @@ class _ContactsPageState extends State<ContactsPage> {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (context) => ChangeNotifierProvider(
-                create: (_) => ChatProvider(contact),
+                create: (_) => ChatProvider(contact, contact.chatId),
                 child: ChatPage(),
               ),
             ),
@@ -134,7 +134,7 @@ class _ContactsPageState extends State<ContactsPage> {
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                   builder: (context) => ChangeNotifierProvider(
-                    create: (_) => ChatProvider(contact),
+                    create: (_) => ChatProvider(contact, value),
                     child: ChatPage(),
                   ),
                 ),

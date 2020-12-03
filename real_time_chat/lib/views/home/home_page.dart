@@ -70,10 +70,6 @@ class _HomePageState extends State<HomePage>
             style: Theme.of(context).textTheme.headline5,
           ),
         ),
-        Text(
-          'Settings',
-          style: Theme.of(context).textTheme.headline5,
-        ),
         SizedBox(
           height: 40,
         ),
