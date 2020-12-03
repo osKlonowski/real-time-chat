@@ -117,9 +117,9 @@ class _ChatPageState extends State<ChatPage> {
                 controller: _textController,
                 keyboardType: TextInputType.multiline,
                 onChanged: (value) {
-                  print('On changed');
-                  //TODO: Update message with text
-                  chatProvider.updateMessage(value.trim());
+                  if(value.isNotEmpty) {
+                    chatProvider.updateMessage(value.trim());
+                  }
                 },
                 onTap: () {
                   chatProvider.setSentStatus = false;

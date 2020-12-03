@@ -19,6 +19,7 @@ class _HomeContentState extends State<HomeContent> {
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
+              print(snapshot.data.length.toString());
               if (snapshot.hasData && snapshot.data.length > 0) {
                 List<Contact> chats = snapshot.data;
                 return ListView.builder(

@@ -13,7 +13,7 @@ class ChatProvider extends ChangeNotifier {
     _contact = contact;
     _chatId = contact.chatId;
     chatReference =
-        _firestore.collection('chats').doc(contact.chatId).collection('messages');
+        _firestore.collection('chats').doc(contact.chatId).collection('messages').where('text', isNotEqualTo: '.&.&.');
   }
 
   //Variables
@@ -22,7 +22,7 @@ class ChatProvider extends ChangeNotifier {
   String _messageRef = '';
   bool _justSent = false;
   bool _isWriting = false;
-  CollectionReference chatReference;
+  CollectionReference  chatReference;
 
   //Getters
   String get getMessageRef {

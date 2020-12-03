@@ -35,8 +35,13 @@ class Auth {
         EasyLoading.showInfo('User Not Found');
       } else if (e.code == 'wrong-password') {
         EasyLoading.showError('Wrong Password');
+      } else if (e.code == 'network-request-failed') {
+        EasyLoading.showError('Network Connection Lost');
+      } else {
+        EasyLoading.showError('Unexpected Error: ${e.code}');
       }
     } catch (e) {
+      EasyLoading.showError('Unexpected Error');
       print(e);
     }
     return false;
@@ -58,8 +63,13 @@ class Auth {
         EasyLoading.showInfo('Password Too Weak');
       } else if (e.code == 'email-already-in-use') {
         EasyLoading.showError('Email Already in Use');
+      } else if (e.code == 'network-request-failed') {
+        EasyLoading.showError('Network Connection Lost');
+      } else {
+        EasyLoading.showError('Unexpected Error: ${e.code}');
       }
     } catch (e) {
+      EasyLoading.showError('Unexpected Error');
       print(e);
     }
     return false;
