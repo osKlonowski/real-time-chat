@@ -61,6 +61,20 @@ class _NewUserWelcomeState extends State<NewUserWelcome> {
     }
   }
 
+  Future<void> _skipPicture() async {
+    setState(() {
+      _img = File('assets/placeholder.jpg');
+      hasPicture = true;
+    });
+    EasyLoading.showToast('Setting Placeholder...');
+    await _uploadPic(_img);
+    EasyLoading.showToast(
+      'Completed',
+      toastPosition: EasyLoadingToastPosition.bottom,
+    );
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,8 +122,15 @@ class _NewUserWelcomeState extends State<NewUserWelcome> {
               //RULES
               //Continue Button
               _addBtn(context),
-              SizedBox(height: 15.0,),
-              _skipBtn(),
+              SizedBox(
+                height: 15.0,
+              ),
+              hasPicture
+                  ? SizedBox(
+                      height: 0,
+                      width: 0,
+                    )
+                  : _skipBtn(),
             ],
           ),
         ),
@@ -119,13 +140,11 @@ class _NewUserWelcomeState extends State<NewUserWelcome> {
 
   Widget _skipBtn() {
     return GestureDetector(
-      onTap: () {
-        //TODO: Skip
-      },
+      onTap: _skipPicture,
       child: Container(
         padding: const EdgeInsets.all(4.0),
         child: Text(
-          'skip',
+          'Skip',
           style: TextStyle(
             fontSize: 11.0,
             color: Colors.blueAccent,
