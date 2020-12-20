@@ -9,33 +9,7 @@ import 'package:real_time_chat/models/classes/contact_class.dart';
 class DatabaseService {
   FirebaseAuth _auth = FirebaseAuth.instance;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  FirebaseStorage _storage = FirebaseStorage.instance;  
-
-  Future<String> getUserProfilePicture(String uid) async {
-    try {
-      DocumentSnapshot ref = await _firestore.collection('users').doc(uid).get();
-      return ref.data()['profilePictureUrl'];
-    } on FirebaseException catch (e) {
-      print(e);
-      return null;
-    } catch (e) {
-      print(e);
-      return null;
-    }
-  }
-
-  Future<Map<String, dynamic>> getMostRecentMessage(String chatId) async {
-    try {
-      QuerySnapshot ref = await _firestore.collection('chats').doc(chatId).collection('messages').orderBy('time', descending: true).limit(1).get();
-      return ref.docs[0].data();
-    } on FirebaseException catch (e) {
-      print(e);
-      return null;
-    } catch (e) {
-      print(e);
-      return null;
-    }
-  }
+  FirebaseStorage _storage = FirebaseStorage.instance;
 
   String getUid() {
     return _auth.currentUser.uid;
@@ -74,14 +48,13 @@ class DatabaseService {
     }
   }
 
-  Future<List<Contact>> getListOfChats() async {
-    QuerySnapshot snapshot = await _firestore
+  Stream<List<Contact>> getStreamOfChats() {
+    var chatStream = _firestore
         .collection('users')
         .doc(_auth.currentUser.uid)
         .collection('contacts')
-        .where('activeChat', isEqualTo: true)
-        .get();
-    return snapshot.docs.map((doc) => Contact.fromFirestore(doc)).toList();
+        .where('activeChat', isEqualTo: true);
+    return chatStream.snapshots().map((list) => list.docs.map((doc) => Contact.fromFirestore(doc)).toList());
   }
 
   Future<String> createNewChat(String uid) async {
@@ -122,7 +95,8 @@ class DatabaseService {
     return _firestore
         .collection('users')
         .doc(_auth.currentUser.uid)
-        .collection('contacts').snapshots();
+        .collection('contacts')
+        .snapshots();
   }
 
   Future<bool> addNewContact(String email) async {

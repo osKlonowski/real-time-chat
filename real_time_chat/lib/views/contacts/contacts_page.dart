@@ -59,13 +59,17 @@ class _ContactsPageState extends State<ContactsPage> {
                 );
                 break;
               case ConnectionState.active:
-                return ListView.builder(
+                return ListView.separated(
                   itemCount: snapshot.data.docs.length,
                   itemBuilder: (context, index) {
                     Contact contact =
                         Contact.fromFirestore(snapshot.data.docs[index]);
                     return _contactTile(contact);
                   },
+                  separatorBuilder: (context, index) => Divider(
+                    thickness: 1.5,
+                    color: Colors.grey[900],
+                  ),
                 );
                 break;
               default:

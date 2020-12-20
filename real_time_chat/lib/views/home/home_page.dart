@@ -1,4 +1,3 @@
-import 'package:fancy_drawer/fancy_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:real_time_chat/global.dart';
 import 'package:real_time_chat/models/dialogs/add_new_contact_dialog.dart';
@@ -19,9 +18,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with TickerProviderStateMixin, WidgetsBindingObserver {
-  FancyDrawerController _controller;
-  bool isOpen = false;
-
   void _showFirstTimeWelcome() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isNewUser = (prefs.getBool('isNewUser') ?? false);
@@ -37,94 +33,109 @@ class _HomePageState extends State<HomePage>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _showFirstTimeWelcome();
-    _controller = FancyDrawerController(
-        vsync: this, duration: Duration(milliseconds: 250))
-      ..addListener(() {
-        setState(() {});
-      });
   }
 
   @override
   Widget build(BuildContext context) {
-    return FancyDrawerWrapper(
+    return Scaffold(
       backgroundColor: Colors.white,
-      controller: _controller,
-      drawerItems: <Widget>[
-        GestureDetector(
-          onTap: () {
-            Navigator.of(context)
-                .push(MaterialPageRoute(builder: (context) => ProfilePage()));
-          },
-          child: Text(
-            'Profile',
-            style: Theme.of(context).textTheme.headline5,
-          ),
+      appBar: AppBar(
+        title: Text(
+          'Chats',
+          style: Theme.of(context).textTheme.headline5.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'Raleway',
+              ),
         ),
-        GestureDetector(
-          onTap: () {
-            Navigator.of(context)
-                .push(MaterialPageRoute(builder: (context) => ContactsPage()));
-          },
-          child: Text(
-            'Contacts',
-            style: Theme.of(context).textTheme.headline5,
-          ),
-        ),
-        SizedBox(
-          height: 40,
-        ),
-        GestureDetector(
-          onTap: widget.logoutCallback,
-          child: Text(
-            'Logout',
-            style: Theme.of(context).textTheme.subtitle1,
-          ),
-        ),
-      ],
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          leading: GestureDetector(
-            onTap: () {
-              if (isOpen) {
-                _controller.close();
-                setState(() {
-                  isOpen = false;
-                });
-              } else {
-                _controller.open();
-                setState(() {
-                  isOpen = true;
-                });
-              }
+        backgroundColor: primaryBlue,
+        actions: <Widget>[
+          GestureDetector(
+            onTap: () async {
+              await showAddNewContactDialog(context);
             },
-            child: Icon(Icons.menu, color: Colors.white),
-          ),
-          title: Text(
-            'Chats',
-            style: Theme.of(context).textTheme.headline5.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontFamily: 'Raleway',
-                ),
-          ),
-          backgroundColor: primaryBlue,
-          actions: <Widget>[
-            GestureDetector(
-              onTap: () async {
-                await showAddNewContactDialog(context);
-              },
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Icon(
-                  Icons.person_add,
-                  color: Colors.white,
-                ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Icon(
+                Icons.person_add,
+                color: Colors.white,
               ),
             ),
-          ],
+          ),
+        ],
+      ),
+      drawer: Drawer(
+        elevation: 0,
+        child: Container(
+          color: primaryBlue,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(18.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ProfilePage(),
+                        ),
+                      );
+                    },
+                    child: _drawerText('Profile'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ContactsPage(),
+                        ),
+                      );
+                    },
+                    child: _drawerText('Contacts'),
+                  ),
+                  SizedBox(
+                    height: 40,
+                  ),
+                  GestureDetector(
+                    onTap: widget.logoutCallback,
+                    child: _drawerLogout(),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
-        body: HomeContent(),
+      ),
+      body: HomeContent(),
+    );
+  }
+
+  Widget _drawerText(String text) {
+    return Padding(
+      padding: const EdgeInsets.all(6.0),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.headline5.copyWith(
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _drawerLogout() {
+    return Padding(
+      padding: const EdgeInsets.all(6.0),
+      child: Text(
+        'Logout',
+        style: Theme.of(context).textTheme.subtitle1.copyWith(
+          color: Colors.white,
+        ),
       ),
     );
   }
@@ -136,11 +147,5 @@ class _HomePageState extends State<HomePage>
     } else {
       DatabaseService().setOnlineStatus(false);
     }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 }

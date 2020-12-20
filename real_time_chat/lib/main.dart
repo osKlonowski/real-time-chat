@@ -3,7 +3,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:provider/provider.dart';
 import 'package:real_time_chat/enums/auth_enum.dart';
+import 'package:real_time_chat/services/database.dart';
 import 'package:real_time_chat/views/home/home_page.dart';
 import 'package:real_time_chat/views/login_signup/login_main.dart';
 
@@ -97,15 +99,12 @@ class _UserEntranceState extends State<UserEntrance> {
     switch (_authStatus) {
       case AuthStatus.NOT_DETERMINED:
         return buildWaitingScreen();
-        break;
       case AuthStatus.NOT_LOGGED_IN:
         return LoginPage(loginCallback);
-        break;
       case AuthStatus.LOGGED_IN:
         return HomePage(
           logoutCallback: logoutCallback,
         );
-        break;
       default:
         return buildWaitingScreen();
     }
