@@ -1,6 +1,9 @@
+import 'package:conditional_builder/conditional_builder.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:real_time_chat/models/classes/contact_class.dart';
 import 'package:real_time_chat/services/database.dart';
+import 'package:real_time_chat/services/providers/preview_chat_provider.dart';
 import 'package:real_time_chat/widgets/chat_widgets/chat_preview.dart';
 
 class HomeContent extends StatefulWidget {
@@ -11,46 +14,39 @@ class HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<HomeContent> {
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: FutureBuilder(
-        future: DatabaseService().getListOfChats(),
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.done:
-              print(snapshot.data.length.toString());
-              if (snapshot.hasData && snapshot.data.length > 0) {
-                List<Contact> chats = snapshot.data;
+    return StreamProvider<List<Contact>>(
+      create: (_) => DatabaseService().getStreamOfChats(),
+      builder: (BuildContext context, child) {
+        return Consumer<List<Contact>>(
+          builder: (context, List<Contact> contacts, _) {
+            return ConditionalBuilder(
+              condition: contacts != null,
+              builder: (context) {
                 return ListView.builder(
-                  itemCount: chats.length,
+                  itemCount: contacts.length,
                   itemBuilder: (context, index) {
-                    return ChatPreview(contact: chats[index]);
+                    return ChangeNotifierProvider<PreviewChatProvider>(
+                      create: (_) => PreviewChatProvider(contacts[index]),
+                      child: ChatPreview(),
+                    );
                   },
                 );
-              } else {
-                return Container(
-                  child: Center(
-                    child: Text('No Contacts'),
-                  ),
+              },
+              fallback: (context) {
+                return ListView.builder(
+                  itemCount: 3,
+                  itemBuilder: (context, index) {
+                    return LoadingChatPreview();
+                  },
                 );
-              }
-              break;
-            case ConnectionState.active:
-            case ConnectionState.waiting:
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-              break;
-            case ConnectionState.none:
-            default:
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-              break;
-          }
-        },
-      ),
+              },
+            );
+          },
+        );
+      },
     );
   }
 }
