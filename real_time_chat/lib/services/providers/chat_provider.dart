@@ -2,11 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:real_time_chat/models/classes/contact_class.dart';
+import 'package:real_time_chat/models/classes/message_class.dart';
 
 class ChatProvider extends ChangeNotifier {
   //INSTACES
   FirebaseAuth _auth = FirebaseAuth.instance;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final TextEditingController textFieldController = TextEditingController();
 
   //Constructor
   ChatProvider(Contact contact, String chatId) {
@@ -14,6 +16,17 @@ class ChatProvider extends ChangeNotifier {
     _chatId = chatId;
     chatReference =
         _firestore.collection('chats').doc(chatId).collection('messages');
+    textFieldController.addListener(() {
+      //TODO: Implement all handlers for text field
+      print("${textFieldController.value.text}");
+      print(_isWriting.toString());
+      if (textFieldController.text.isEmpty && !_isWriting && !_justSent) {
+        createMessageRef();
+        _justSent = false;
+      } else if (textFieldController.text.isNotEmpty || _isWriting) {
+        updateMessage(textFieldController.text.trim());
+      }
+    });
   }
 
   //Variables
@@ -22,39 +35,35 @@ class ChatProvider extends ChangeNotifier {
   String _messageRef = '';
   bool _justSent = false;
   bool _isWriting = false;
-  CollectionReference  chatReference;
+  CollectionReference chatReference;
 
   //Getters
-  String get getMessageRef {
-    return _messageRef;
-  }
+  String get getMessageRef => _messageRef;
 
-  String get getChatId {
-    return _chatId;
-  }
+  String get getChatId => _chatId;
 
-  bool get justSent {
-    return _justSent;
-  }
+  bool get justSent => _justSent;
 
-  String get name {
-    return _contact.name;
-  }
+  String get name => _contact.name;
+
+  FirebaseAuth get auth => _auth;
 
   //Setters
   set messageRef(String newRef) {
     _messageRef = newRef;
   }
 
-  set setSentStatus(bool stat) {
-    _justSent = false;
-  }
-
   //Functions
   void clearMessage() {
-    if(_messageRef != '') {
+    if (_messageRef != '' || _isWriting) {
       _isWriting = false;
-      _firestore.collection('chats').doc(_chatId).collection('messages').doc(_messageRef).delete();
+      _firestore
+          .collection('chats')
+          .doc(_chatId)
+          .collection('messages')
+          .doc(_messageRef)
+          .delete();
+      textFieldController.clear();
     }
   }
 
@@ -77,10 +86,11 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> createMessageRef() async {
+  Future<void> createMessageRef() async {
     try {
       if (!_justSent && !_isWriting) {
         _isWriting = true;
+        _justSent = false;
         DocumentReference msgRef = await _firestore
             .collection('chats')
             .doc(_chatId)
@@ -89,34 +99,39 @@ class ChatProvider extends ChangeNotifier {
           'text': '.&.&.',
           'sender_uid': _auth.currentUser.uid,
           'sender_name': _auth.currentUser.displayName,
-          'time': FieldValue.serverTimestamp()
+          'time': FieldValue.serverTimestamp(),
+          'isSent': false,
         });
         _messageRef = msgRef.id;
-        return _messageRef != '';
-      } else {
-        return false;
       }
     } on FirebaseException catch (e) {
       print(e);
-      return false;
     } catch (e) {
       print(e);
-      return true;
     }
   }
 
-  Future<bool> sendText(String text) async {
-    _justSent = true;
+  Future<bool> sendText() async {
     _isWriting = false;
     try {
-      await _firestore
-          .collection('chats')
-          .doc(_chatId)
-          .collection('messages')
-          .doc(_messageRef)
-          .update({'time': FieldValue.serverTimestamp()});
-      _messageRef = '';
-      await createMessageRef();
+      if (textFieldController.text.isNotEmpty) {
+        await _firestore
+            .collection('chats')
+            .doc(_chatId)
+            .collection('messages')
+            .doc(_messageRef)
+            .update({
+          'time': FieldValue.serverTimestamp(),
+          'text': textFieldController.text.trim(),
+          'isSent': true,
+        });
+        _messageRef = '';
+        this.textFieldController.clear();
+        _justSent = true;
+        await createMessageRef();
+      } else {
+        clearMessage();
+      }
       return true;
     } on FirebaseException catch (e) {
       print(e);
@@ -127,11 +142,13 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  Stream<QuerySnapshot> chatMessages() {
-    return _firestore
+  Stream<List<Message>> streamChatMessages() {
+    var msgStream = _firestore
         .collection('chats')
         .doc(_chatId)
         .collection('messages')
-        .snapshots();
+        .orderBy('time', descending: true);
+    return msgStream.snapshots().map(
+        (list) => list.docs.map((doc) => Message.fromFirestore(doc)).toList());
   }
 }
