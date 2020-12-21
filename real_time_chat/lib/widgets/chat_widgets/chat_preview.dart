@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:real_time_chat/models/classes/contact_class.dart';
 import 'package:real_time_chat/models/classes/message_class.dart';
+import 'package:real_time_chat/services/database.dart';
 import 'package:real_time_chat/services/providers/chat_provider.dart';
 import 'package:real_time_chat/services/providers/preview_chat_provider.dart';
 import 'package:real_time_chat/views/chat/chat_page.dart';
@@ -108,11 +109,26 @@ class ChatPreview extends StatelessWidget {
                                 previewChatProvider.streamChatMessages(),
                             child: Consumer<List<Message>>(
                               builder: (_, messages, child) {
+                                String confirmUid = DatabaseService().getUid();
                                 if (messages != null && messages.length > 0) {
-                                  return Text(
-                                    messages[0].text,
-                                    softWrap: false,
-                                    overflow: TextOverflow.ellipsis,
+                                  return Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      confirmUid == messages[0].senderUid
+                                          ? Icon(
+                                              Icons.arrow_forward_ios,
+                                              size: 10.0,
+                                            )
+                                          : Icon(
+                                              Icons.arrow_back_ios,
+                                              size: 10.0,
+                                            ),
+                                      Text(
+                                        messages[0].text,
+                                        softWrap: false,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
                                   );
                                 } else {
                                   return Text(
