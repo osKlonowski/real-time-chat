@@ -34,7 +34,6 @@ class _ChatPageState extends State<ChatPage> {
             leading: IconButton(
               icon: Icon(Icons.arrow_back_ios),
               onPressed: () {
-                chatProvider.clearMessage();
                 Navigator.of(context).pop();
               },
             ),
@@ -46,7 +45,7 @@ class _ChatPageState extends State<ChatPage> {
             onTap: () {
               FocusScopeNode currentFocus = FocusScope.of(context);
               if (!currentFocus.hasPrimaryFocus) {
-                chatProvider.clearMessage();
+                chatProvider.unfocusTextField();
                 currentFocus.unfocus();
               }
             },
@@ -147,11 +146,12 @@ class _ChatPageState extends State<ChatPage> {
                   keyboardType: TextInputType.multiline,
                   minLines: 1,
                   maxLines: 8,
-                  //maxLength: 240,
-                  //TODO: This might be neccessary if you wanna enforce half-height max box size.
                   decoration: InputDecoration.collapsed(
                     hintText: 'Type a message...',
                   ),
+                  onTap: () {
+                    chatProvider.isWriting = true;
+                  },
                 ),
               ),
             ),
