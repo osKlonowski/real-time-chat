@@ -1,8 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:conditional_builder/conditional_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:real_time_chat/models/classes/contact_class.dart';
 import 'package:real_time_chat/models/classes/message_class.dart';
 import 'package:real_time_chat/services/database.dart';
 import 'package:real_time_chat/services/providers/chat_provider.dart';
@@ -89,6 +87,7 @@ class ChatPreview extends StatelessWidget {
                                     builder: (_, messages, child) {
                                       if (messages != null &&
                                           messages.length > 0) {
+                                        messages.removeWhere((msg) => msg.text == '.&.&.');
                                         return Text(
                                           '${messages[0].time.toDate().hour}:${messages[0].time.toDate().minute}',
                                         );
@@ -111,6 +110,7 @@ class ChatPreview extends StatelessWidget {
                               builder: (_, messages, child) {
                                 String confirmUid = DatabaseService().getUid();
                                 if (messages != null && messages.length > 0) {
+                                  messages.removeWhere((msg) => msg.text == '.&.&.');
                                   return Row(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
