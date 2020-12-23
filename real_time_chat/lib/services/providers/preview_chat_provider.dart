@@ -42,7 +42,7 @@ class PreviewChatProvider with ChangeNotifier {
     var msgStream = _firestore
         .collection('chats')
         .doc(this.contact.chatId)
-        .collection('messages').orderBy('time', descending: true);
+        .collection('messages').orderBy('time', descending: true); //.where('text', isNotEqualTo: '.&.&.')
     return msgStream.snapshots().map((list) => list.docs.map((doc) => Message.fromFirestore(doc)).toList());
   }
 }
