@@ -54,7 +54,14 @@ class DatabaseService {
         .doc(_auth.currentUser.uid)
         .collection('contacts')
         .where('activeChat', isEqualTo: true);
-    return chatStream.snapshots().map((list) => list.docs.map((doc) => Contact.fromFirestore(doc)).toList());
+    return chatStream
+        .snapshots()
+        .map((list) =>
+            list.docs.map((doc) => Contact.fromFirestore(doc)).toList())
+        .handleError(() {
+          print('List of Contact Stream Failed');
+          return <Contact>[];
+        });
   }
 
   Future<String> createNewChat(String uid) async {
@@ -182,6 +189,10 @@ class DatabaseService {
 
   String getProfileName() {
     return _auth.currentUser.displayName;
+  }
+
+  String getProfileEmail() {
+    return _auth.currentUser.email;
   }
 
   void setOnlineStatus(bool status) {

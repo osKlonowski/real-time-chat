@@ -13,7 +13,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: primaryBlue,
       appBar: AppBar(
         title: Text(
           'Profile',
@@ -23,17 +23,44 @@ class _ProfilePageState extends State<ProfilePage> {
                 fontFamily: 'Raleway',
               ),
         ),
+        elevation: 0,
         backgroundColor: primaryBlue,
       ),
       body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            //Profile Picture
-            _profilePicture(),
-            //Name
-            _profileName(),
-            //Other
-          ],
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              //Profile Picture
+              _profilePicture(),
+              //Name & Email
+              _profileInfo(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _profileInfo() {
+    return Column(
+      children: [
+        _profileName(),
+        _profileEmail(),
+      ],
+    );
+  }
+
+  Widget _profileEmail() {
+    return Container(
+      child: Text(
+        DatabaseService().getProfileEmail(),
+        style: TextStyle(
+          color: Colors.white,
+          fontFamily: 'Raleway',
+          fontSize: 20.0,
         ),
       ),
     );
@@ -41,12 +68,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _profileName() {
     return Container(
-      padding: const EdgeInsets.all(14.0),
+      padding: const EdgeInsets.fromLTRB(10.0, 25.0, 10.0, 8.0),
       child: Text(
         DatabaseService().getProfileName(),
         style: TextStyle(
-          color: Colors.black,
+          color: Colors.white,
           fontFamily: 'Raleway',
+          fontWeight: FontWeight.bold,
           fontSize: 24.0,
         ),
       ),
@@ -54,7 +82,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _profilePicture() {
-    double size = MediaQuery.of(context).size.width * 0.40;
+    double size = MediaQuery.of(context).size.width * 0.45;
     return Container(
       margin: const EdgeInsets.only(top: 15.0),
       width: MediaQuery.of(context).size.width,
