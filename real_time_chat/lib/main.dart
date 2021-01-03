@@ -1,7 +1,21 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:real_time_chat/enums/auth_enum.dart';
+import 'package:real_time_chat/views/home/home_page.dart';
+import 'package:real_time_chat/views/login_signup/login_main.dart';
 
-void main() {
-  runApp(MyApp());
+import 'global.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -10,6 +24,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Real Time Chat',
       debugShowCheckedModeBanner: false,
+      locale: Locale("en"),
       theme: ThemeData(
         brightness: Brightness.light,
         primaryColor: Colors.lightBlue[800],
@@ -22,19 +37,91 @@ class MyApp extends StatelessWidget {
         ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: HomePage(),
+      home: UserEntrance(),
+      builder: (BuildContext context, Widget child) {
+        return FlutterEasyLoading(child: child);
+      },
     );
   }
 }
 
-class HomePage extends StatelessWidget {
-  const HomePage({Key key}) : super(key: key);
+class UserEntrance extends StatefulWidget {
+  UserEntrance({Key key}) : super(key: key);
+
+  @override
+  _UserEntranceState createState() => _UserEntranceState();
+}
+
+class _UserEntranceState extends State<UserEntrance> {
+  FirebaseAuth _auth = FirebaseAuth.instance;
+  AuthStatus _authStatus = AuthStatus.NOT_DETERMINED;
+
+  @override
+  void initState() {
+    if (_auth.currentUser != null) {
+      print(_auth.currentUser.uid);
+      setState(() {
+        _authStatus = AuthStatus.LOGGED_IN;
+      });
+    } else {
+      setState(() {
+        _authStatus = AuthStatus.NOT_LOGGED_IN;
+      });
+    }
+    super.initState();
+  }
+
+  //Pass this to Login Page to Change Auth State once logged in
+  void loginCallback() {
+    if (_auth.currentUser != null) {
+      print(_auth.currentUser.uid);
+      setState(() {
+        _authStatus = AuthStatus.LOGGED_IN;
+      });
+    } else {
+      setState(() {
+        _authStatus = AuthStatus.NOT_LOGGED_IN;
+      });
+    }
+  }
+
+  void logoutCallback() {
+    _auth.signOut();
+    setState(() {
+      _authStatus = AuthStatus.NOT_LOGGED_IN;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    switch (_authStatus) {
+      case AuthStatus.NOT_DETERMINED:
+        return buildWaitingScreen();
+      case AuthStatus.NOT_LOGGED_IN:
+        return LoginPage(loginCallback);
+      case AuthStatus.LOGGED_IN:
+        return HomePage(
+          logoutCallback: logoutCallback,
+        );
+      default:
+        return buildWaitingScreen();
+    }
+  }
+
+  Widget buildWaitingScreen() {
     return Scaffold(
-      body: Container(
-        child: Center(child: Text('Hello World')),
+      backgroundColor: primaryBlue,
+      body: SafeArea(
+        child: Center(
+          child: Text(
+            "Real Time Chat",
+            maxLines: 1,
+            style: Theme.of(context)
+                .textTheme
+                .headline2
+                .copyWith(color: Colors.white),
+          ),
+        ),
       ),
     );
   }
